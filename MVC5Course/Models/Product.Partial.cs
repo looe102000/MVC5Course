@@ -32,7 +32,7 @@ namespace MVC5Course.Models
             using (var db = new FabricsEntities())
             {
                 var prod = db.Product.FirstOrDefault(p => p.ProductId == this.ProductId);
-                if (prod.OrderLine.Count() > 5 && this.Stock == 0)
+                if (prod != null && prod.OrderLine.Count() > 5 && this.Stock == 0)
                 {
                     yield return new ValidationResult("Stock 與訂單數量不匹配",
                         new string[] { "Stock" });

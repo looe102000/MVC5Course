@@ -8,6 +8,9 @@ using System.Web;
 using System.Web.Mvc;
 using MVC5Course.Models;
 using MVC5Course.Models.ViewModels;
+using System.Data.SqlClient;
+using System.Data.Entity.Infrastructure;
+using System.Data.Entity.Validation;
 
 namespace MVC5Course.Controllers
 {
@@ -18,6 +21,7 @@ namespace MVC5Course.Controllers
         //private FabricsEntities db = new FabricsEntities();
 
         // GET: Products
+        [OutputCache(Duration = 5, Location = System.Web.UI.OutputCacheLocation.ServerAndClient)]
         public ActionResult Index(bool Active = true)
         {
             var data = repo.GetProduct列表頁所有資料(Active, showAll: false);
@@ -56,9 +60,10 @@ namespace MVC5Course.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [HandleError(ExceptionType = typeof(DbUpdateException), View = "Error_DbUpdateException")]
         public ActionResult Create([Bind(Include = "ProductId,ProductName,Price,Active,Stock")] Product product)
         {
-            if (ModelState.IsValid)
+            //if (ModelState.IsValid)
             {
                 repo.Add(product);
                 repo.UnitOfWork.Commit();
@@ -88,17 +93,12 @@ namespace MVC5Course.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id,FormCollection form)
+        public ActionResult Edit(int id, FormCollection form)
         {
-            //會有異常狀況，當需求改變時會出現無法對應繫結，造成抓不到值
-            //[Bind(Include = "ProductId,ProductName,Price,Active,Stock")]
-            //Product product
-
             var product = repo.Get單筆資料ByProductId(id);
-
-            if (TryUpdateModel<Product>(product,new string[] { "ProductId", "ProductName", "Price", "Active", "Stock" }))
+            if (TryUpdateModel(product, 
+                new string[] { "ProductId", "ProductName", "Price", "Active", "Stock" }))
             {
-                //repo.Update(product);
                 repo.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
@@ -160,6 +160,7 @@ namespace MVC5Course.Controllers
         [HttpPost]
         public ActionResult ListProducts(ProductListSearchVM searchCondition, ProductBatchUpdateVM[] items)
         {
+            // TryUpdateModel(searchCondition, "searchCondition")
             if (ModelState.IsValid)
             {
                 foreach (var item in items)

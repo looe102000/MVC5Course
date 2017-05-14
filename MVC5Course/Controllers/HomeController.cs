@@ -18,16 +18,20 @@ namespace MVC5Course.Controllers
             return View();
         }
 
+        [SharedViewBag]
         public ActionResult About()
         {
-            ViewBag.Message = "Your application description page.";
+            // ViewBag.Message = "Your application description page.";
+
+            throw new ArgumentException("Error Handled!!");
 
             return View();
         }
 
+        [SharedViewBag(MyProperty = "")]
         public ActionResult PartialAbout()
         {
-            ViewBag.Message = "Your application description page.";
+            // ViewBag.Message = "Your application description page.";
 
             if (Request.IsAjaxRequest())
             {
@@ -70,6 +74,19 @@ namespace MVC5Course.Controllers
 
             return Json(db.Product.Take(5),
                 JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult VT()
+        {
+            ViewBag.IsEnabled = true;
+
+            return View();
+        }
+
+        public ActionResult RazorTest()
+        {
+            ViewData.Model = new int[] { 1, 2, 3, 4, 5 };
+            return PartialView();
         }
     }
 }
